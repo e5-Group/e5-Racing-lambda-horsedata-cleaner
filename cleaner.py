@@ -26,7 +26,7 @@ def delete_old_entries():
 
         entries_table = database.Table('entries')
 
-        entries = entries_table.scan(FilterExpression=Attr('Brand').eq('e5'))
+        entries = entries_table.scan()
 
         for entry in entries["Items"]:
             entry_id = entry['unique_id']
@@ -35,9 +35,9 @@ def delete_old_entries():
             entry_day_notz = parser.parse(entry_day_string)
             entry_day = eastern.localize(entry_day_notz)
             
-            print(entry_day)
-            print(todays_day)
-            print(entry_day - todays_day)
+            #print(entry_day)
+            #print(todays_day)
+            #print(entry_day - todays_day)
 
             if todays_day > entry_day:
                 entries_table.delete_item(
@@ -46,6 +46,29 @@ def delete_old_entries():
                         'Entry_Date': entry['Entry_Date']
                     }
                 )                    
+
+        entries_mc_table = database.Table('entries_mc')
+
+        entries_mc = entries_mc_table.scan()
+
+        for entry in entries_mc["Items"]:
+            entry_id = entry['unique_id']
+            post_time = entry['post_time']
+            entry_day_string = entry['Entry_Date'] + ' ' + post_time + ' PM'
+            entry_day_notz = parser.parse(entry_day_string)
+            entry_day = eastern.localize(entry_day_notz)
+            
+            #print(entry_day)
+            #print(todays_day)
+            #print(entry_day - todays_day)
+
+            if todays_day > entry_day:
+                entries_mc_table.delete_item(
+                    Key={
+                        'unique_id': entry_id,
+                        'Entry_Date': entry['Entry_Date']
+                    }
+                )  
 
     except Exception as ex:
         print('in entries')
@@ -64,21 +87,47 @@ def delete_old_results():
 
         results_table = database.Table('results')
 
-        results = results_table.scan(FilterExpression=Attr('Brand').eq('e5'))
+        results = results_table.scan()
 
         for result in results["Items"]:
             result_id = result['unique_id']
             result_date_string = result['Event_Date']
             result_date_notz = parser.parse(result_date_string)
             result_date = eastern.localize(result_date_notz)
+            
+            #print(result_date)
+            #print(today_date)
+            #print(result_date - today_date)
 
-            if (result_date - today_date) < timedelta(days=8):
+            if (result_date - today_date) > timedelta(days=8):
                 results_table.delete_item(
                     Key={
                         'unique_id': result_id,
                         'Event_Date': result['Event_Date']
                     }
                 )                    
+
+        results_mc_table = database.Table('results_mc')
+
+        results_mc = results_mc_table.scan()
+
+        for result in results["Items"]:
+            result_id = result['unique_id']
+            result_date_string = result['Event_Date']
+            result_date_notz = parser.parse(result_date_string)
+            result_date = eastern.localize(result_date_notz)
+            
+            #print(result_date)
+            #print(today_date)
+            #print(result_date - today_date)
+
+            if (result_date - today_date) > timedelta(days=8):
+                results_mc_table.delete_item(
+                    Key={
+                        'unique_id': result_id,
+                        'Event_Date': result['Event_Date']
+                    }
+                )  
 
     except Exception as ex:
         print('in results')
@@ -97,7 +146,7 @@ def delete_old_workouts():
 
         workouts_table = database.Table('workouts')
 
-        workouts = workouts_table.scan(FilterExpression=Attr('Brand').eq('e5'))
+        workouts = workouts_table.scan()
 
         for workout in workouts["Items"]:
             workout_id = workout['unique_id']
@@ -105,14 +154,39 @@ def delete_old_workouts():
             workout_date_notz = parser.parse(workout_date_string)
             workout_date = eastern.localize(workout_date_notz)
 
+            #print(workout_date)
+            #print(today_date)
+            #print(workout_date - today_date)
 
-            if (workout_date - today_date) < timedelta(days=15):
+            if (workout_date - today_date) > timedelta(days=15):
                 workouts_table.delete_item(
                     Key={
                         'unique_id': workout_id,
                         'Event_Date': workout['Event_Date']
                     }
-                )                    
+                )
+                
+        workouts_mc_table = database.Table('workouts_mc')
+
+        workouts_mc = workouts_mc_table.scan()
+
+        for workout in workouts["Items"]:
+            workout_id = workout['unique_id']
+            workout_date_string = workout['Event_Date']
+            workout_date_notz = parser.parse(workout_date_string)
+            workout_date = eastern.localize(workout_date_notz)
+
+            #print(workout_date)
+            #print(today_date)
+            #print(workout_date - today_date)
+
+            if (workout_date - today_date) > timedelta(days=15):
+                workouts_mc_table.delete_item(
+                    Key={
+                        'unique_id': workout_id,
+                        'Event_Date': workout['Event_Date']
+                    }
+                )   
 
     except Exception as ex:
         print('in workouts')
